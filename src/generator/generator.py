@@ -53,7 +53,7 @@ def generate_event():
     )
 
 def main():
-    print("🎮 WoW Stats Generator запущен. Ожидание готовности БД...")
+    print("Generator запущен. Ожидание готовности БД...")
     conn = None
     cursor = None
 
@@ -63,9 +63,9 @@ def main():
             cursor = conn.cursor()
             ensure_table_exists(cursor)
             conn.commit()
-            print("✅ Таблица game_events готова. Начинаем генерацию событий...")
+            print("Таблица game_events готова. Начинаем генерацию событий...")
         except psycopg2.OperationalError as e:
-            print(f"⚠️ PostgreSQL недоступен, повтор через 3 сек... ({e})")
+            print(f"PostgreSQL недоступен, повтор через 3 сек... ({e})")
             time.sleep(3)
 
     try:
@@ -82,7 +82,7 @@ def main():
             print(f"[{datetime.now().strftime('%H:%M:%S')}] ➕ {event}")
             time.sleep(INTERVAL)
     except KeyboardInterrupt:
-        print("\n🛑 Остановка генератора...")
+        print("\nОстановка генератора...")
     finally:
         if cursor:
             cursor.close()

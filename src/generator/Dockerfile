@@ -1,17 +1,8 @@
-FROM python:3.13-slim AS builder
+FROM python:3.12-slim
 
 WORKDIR /app
-
 COPY reqs.txt .
-
-RUN pip install --no-cache-dir uv && uv pip install --no-cache-dir --target /install -r reqs.txt
-
-FROM gcr.io/distroless/python3-debian12
-
-WORKDIR /app
-
-COPY --from=builder /install /app
+RUN pip install --no-cache-dir -r reqs.txt
 COPY generator.py .
-ENV PYTHONPATH=/app
 
-CMD ["python3","generator.py"]
+CMD ["python3", "generator.py"]
