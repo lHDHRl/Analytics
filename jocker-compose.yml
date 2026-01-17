@@ -1,0 +1,115 @@
+#f your volumes man)
+x-redash-service: &redash-service
+  image: redash/redash:latest # ох уж эти образы, 25.8.0 просто не работает, потому что не может распарсить строку подключения... 
+  depends_on:
+    - postgres
+    - redis
+  env_file: .env
+  restart: always
+  networks:
+    - analytics-i-found-your-trick-very-funny
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    env_file: .env
+    container_name: pg
+    environment:
+      POSTGRES_DB: ${POSTGRESQL_DATABASE}
+      POSTGRES_USER: ${POSTGRESQL_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports: 
+      - "5432:5432"
+    networks:
+      - analytics-i-found-your-trick-very-funny
+
+  redash:
+    <<: *redash-service
+    container_name: redash_serv
+    command: server
+    ports:
+      - "5000:5000"
+    environment:
+      REDASH_WEB_WORKERS: 4
+    depends_on:
+      - migrations
+    
+  migrations:
+    <<: *redash-service
+    container_name: redash_db_migrations
+    command: create_db
+    restart: "no"
+
+  scheduler:
+    <<: *redash-service
+    container_name: rsh_scheduler
+    command: scheduler
+    depends_on:
+      - redash
+
+  scheduled_worker:
+    <<: *redash-service
+    container_name: rsh_worker_scheduled
+    command: worker
+    depends_on:
+      - redash
+    environment:
+      QUEUES: "scheduled_queries,schemas"
+      WORKERS_COUNT: 1
+
+  adhoc_worker:
+    <<: *redash-service
+    container_name: rsh_adhoc_worker_scheduled
+    command: worker
+    depends_on:
+      - redash
+    environment:
+      QUEUES: "queries"
+      WORKERS_COUNT: 2
+
+  nginx:
+    container_name: nginx_rsh
+    image: redash/nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - redash
+    restart: always
+    networks:
+      - analytics-i-found-your-trick-very-funny
+
+  worker:
+    <<: *redash-service
+    container_name: rsh_current_worker
+    command: worker
+    depends_on:
+      - redash
+    environment:
+      QUEUES: "periodic,emails,default"
+      WORKERS_COUNT: 1
+
+  redis:
+    image: redis:8.4.0-alpine
+    container_name: redis
+    networks:
+      - analytics-i-found-your-trick-very-funny
+
+  generator:
+    build:
+      context: ./src/generator/
+      dockerfile: build/local/Dockerfile
+    container_name: gen
+    env_file: .env
+    depends_on:
+      - postgres
+    networks:
+      - analytics-i-found-your-trick-very-funny
+
+volumes:
+  postgres_data:
+
+networks:
+  analytics-i-found-your-trick-very-funny:
+    driver: bridge
