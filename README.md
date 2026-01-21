@@ -30,6 +30,8 @@
 
 ## Как запустить
 
+Не забудьте скачать Docker или Podman, а так же task для удобства
+
 ### 1. Настройка переменных окружения
 
 Создайте файл `.env` в корне проекта на основе `.env.example`:
@@ -65,10 +67,10 @@ task up-jupyter
 docker-compose -f jocker-compose.yml up
 ```
 
-### 4. Доступ к сервисам
+### 4. Доступ
 
 - **Redash**: http://localhost:80 через nginx
-- **Jupyter Notebook**: http://localhost:8888 (если запущен)
+- **Jupyter Notebook**: http://localhost:8888 (если запущен) либо через vscode подключить kernel, так же есть возможность локально через uv sync
 - **PostgreSQL**: localhost:5432
 
 ### 5. Аналитика в Jupyter
