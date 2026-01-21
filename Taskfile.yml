@@ -1,0 +1,25 @@
+version: '3.11'
+
+tasks:
+  default:
+    cmd: task --list
+
+  up-without-jupyter:
+    desc: Запуск всех сервисов кроме jupyter
+    cmds:
+      - DOCKER_BUILDKIT=0 docker compose -f jocker-compose.yml up --scale jupyter=0 --force-recreate
+
+  up-all:
+    desc: Запуск всех сервисов включая jupyter
+    cmds:
+      - DOCKER_BUILDKIT=0 docker compose -f jocker-compose.yml up --force-recreate
+
+  up-jupyter:
+    desc: Запуск только jupyter сервиса
+    cmds:
+      - DOCKER_BUILDKIT=0 docker compose -f jocker-compose.yml up jupyter
+
+  build-jupyter:
+    desc: билд только jupyter сервиса
+    cmds:
+      - DOCKER_BUILDKIT=0 docker compose -f jocker-compose.yml up jupyter --build

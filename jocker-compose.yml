@@ -1,4 +1,4 @@
-#f your volumes man)
+
 x-redash-service: &redash-service
   image: redash/redash:latest # ох уж эти образы, 25.8.0 просто не работает, потому что не может распарсить строку подключения... 
   depends_on:
@@ -98,7 +98,7 @@ services:
 
   generator:
     build:
-      context: ./src/generator/
+      context: .
       dockerfile: build/local/Dockerfile
     container_name: gen
     env_file: .env
@@ -107,6 +107,19 @@ services:
     networks:
       - analytics-i-found-your-trick-very-funny
 
+  jupyter:
+    build: .
+    container_name: jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./analytics.ipynb:/app/analytics.ipynb
+    env_file: .env
+    depends_on:
+      - postgres
+    networks:
+      - analytics-i-found-your-trick-very-funny
+# как я понимаю, такого должно быть достаточно и прокидывать волюмы наружу докера в виндовс или делать бекапы БД не нужно.
 volumes:
   postgres_data:
 
